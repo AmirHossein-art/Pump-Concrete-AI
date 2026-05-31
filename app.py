@@ -158,6 +158,157 @@ def create_features(
         "Paste_Content": paste_content
     }
 
+def generate_random_mix():
+
+    mix = {
+
+        feature: np.random.uniform(
+            low,
+            high
+        )
+
+        for feature, (low, high)
+        in MIX_RANGES.items()
+    }
+
+    return mix
+
+def is_valid_mix(features):
+
+    if not (
+        0.30 <= features["W_C_Ratio"] <= 0.65
+    ):
+        return False
+
+    if not (
+        0.35 <= features["Fine_Ratio"] <= 0.60
+    ):
+        return False
+
+    if not (
+        300 <= features["Binder"] <= 600
+    ):
+        return False
+
+    return True
+
+# =====================================================
+# MIX RANGES FOR RANDOM GENERATION
+# =====================================================
+
+MIX_RANGES = {
+    "Cement": (250, 550),
+    "FineAggr": (500, 1000),
+    "CoarseAggr": (700, 1300),
+    "Water": (130, 230),
+    "WRA": (0, 15),
+    "FlyAsh": (0, 150),
+    "Accelerator": (0, 10),
+    "SilicaFume": (0, 50)
+}
+
+def predict_strength_from_mix(
+    mix,
+    age=28
+):
+
+    features = create_features(
+        mix["Cement"],
+        mix["FineAggr"],
+        mix["CoarseAggr"],
+        mix["Water"],
+        mix["WRA"],
+        mix["FlyAsh"],
+        mix["Accelerator"],
+        mix["SilicaFume"]
+    )
+
+    features["Time"] = age
+
+    X = pd.DataFrame([features])
+    strength = strength_model.predict(X[strength_features])[0]
+
+    return strength
+
+def generate_candidate_mixes(
+    n_samples=5000
+):
+
+    mixes = []
+
+    while len(mixes) < n_samples:
+
+        mix = generate_random_mix()
+
+        features = create_features(
+            mix["Cement"],
+            mix["FineAggr"],
+            mix["CoarseAggr"],
+            mix["Water"],
+            mix["WRA"],
+            mix["FlyAsh"],
+            mix["Accelerator"],
+            mix["SilicaFume"]
+        )
+
+        if is_valid_mix(features):
+
+            mixes.append(mix)
+
+    return mixes
+
+def evaluate_candidate_mixes(
+    candidate_mixes,
+    age=28
+):
+
+    results = []
+
+    for mix in candidate_mixes:
+
+        strength = predict_strength_from_mix(
+            mix,
+            age
+        )
+
+        row = mix.copy()
+
+        row["Predicted_Strength"] = strength
+
+        results.append(row)
+
+    return pd.DataFrame(results)
+
+def find_best_mixes(
+    target_strength,
+    age=28,
+    n_designs=5,
+    n_candidates=5000
+):
+
+    candidate_mixes = generate_candidate_mixes(
+        n_candidates
+    )
+
+    results_df = evaluate_candidate_mixes(
+        candidate_mixes,
+        age
+    )
+
+    results_df["Error"] = (
+        results_df["Predicted_Strength"]
+        -
+        target_strength
+    ).abs()
+
+    best_designs = (
+        results_df
+        .sort_values("Error")
+        .head(n_designs)
+        .reset_index(drop=True)
+    )
+
+    return best_designs
 
 # =====================================================
 # SIDEBAR
@@ -253,12 +404,15 @@ selected = option_menu(
     options=[
         "Pumpability",
         "Strength",
+        "AI Mix Design",
         "Model Insights"
+        
     ],
     icons=[
         "droplet-half",
         "bar-chart",
-        "cpu"
+        "cpu-fill",
+        "book"
     ],
     orientation="horizontal",
     default_index=0
@@ -568,6 +722,103 @@ elif page == "Strength":
                 "High Strength Concrete"
             )
 
+# =====================================================
+# AI MIX DESIGN
+# =====================================================
+
+elif page == "AI Mix Design":
+
+    st.header(
+        "AI Mix Design Generator"
+    )
+
+    target_strength = st.slider(
+        "Target Strength (MPa)",
+        10,
+        75,
+        40
+    )
+
+    age = st.slider(
+        "Age (Days)",
+        1,
+        365,
+        28
+    )
+
+    if st.button(
+        "Generate Mix Designs",
+        use_container_width=True
+    ):
+
+        with st.spinner(
+            "Generating optimal mix designs..."
+        ):
+
+            designs = find_best_mixes(
+                target_strength=target_strength,
+                age=age,
+                n_designs=5
+            )
+
+        st.success(
+            f"{len(designs)} candidate mix designs generated."
+        )
+
+        cols = st.columns(2)
+
+        for i, (_, row) in enumerate(
+            designs.iterrows()
+        ):
+
+            with cols[i % 2]:
+
+                st.markdown(
+                    f"""
+                    ### 🏗 Mix Design #{i+1}
+                    """
+                )
+
+                c1, c2 = st.columns(2)
+
+                c1.metric(
+                    "Strength",
+                    f"{row['Predicted_Strength']:.2f} MPa"
+                )
+
+                c2.metric(
+                    "Error",
+                    f"{row['Error']:.3f}"
+                )
+
+                st.dataframe(
+                    pd.DataFrame(
+                        {
+                            "Material":[
+                                "Cement",
+                                "Water",
+                                "FineAggr",
+                                "CoarseAggr",
+                                "FlyAsh",
+                                "SilicaFume",
+                                "WRA"
+                            ],
+                            "kg/m³":[
+                                round(row["Cement"],1),
+                                round(row["Water"],1),
+                                round(row["FineAggr"],1),
+                                round(row["CoarseAggr"],1),
+                                round(row["FlyAsh"],1),
+                                round(row["SilicaFume"],1),
+                                round(row["WRA"],1)
+                            ]
+                        }
+                    ),
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+                st.markdown("---")
 # =====================================================
 # MODEL INFO
 # =====================================================
