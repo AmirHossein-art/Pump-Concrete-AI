@@ -742,8 +742,8 @@ elif page == "AI Mix Design":
     age = st.slider(
         "Age (Days)",
         1,
-        365,
-        28
+        28,
+        7
     )
 
     if st.button(
