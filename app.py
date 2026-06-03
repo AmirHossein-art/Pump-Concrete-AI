@@ -45,6 +45,22 @@ h1, h2, h3 {
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+
+div[role="radiogroup"]{
+    display:flex;
+    width:100%;
+}
+
+div[role="radiogroup"] label{
+    flex:1;
+    justify-content:center;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 # =====================================================
 # LOAD MODELS
 # =====================================================
@@ -668,8 +684,8 @@ elif page == "Strength":
         "Compressive Strength Prediction"
     )
 
-    time = st.segmented_control(
-        "Curing Age",
+    age = st.radio(
+        "Target Age",
         options=[7, 28],
         default=28
     )
@@ -685,7 +701,7 @@ elif page == "Strength":
         silica
     )
 
-    features["Time"] = time
+    features["Time"] = age
 
     X = pd.DataFrame([features])
 
@@ -738,7 +754,7 @@ elif page == "AI Mix Design":
         40
     )
 
-    age = st.segmented_control(
+    age = st.radio(
         "Target Age",
         options=[7, 28],
         default=28
