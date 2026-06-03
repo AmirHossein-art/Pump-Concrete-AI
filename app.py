@@ -668,11 +668,10 @@ elif page == "Strength":
         "Compressive Strength Prediction"
     )
 
-    time = st.slider(
-        "Curing Time (Days)",
-        1,
-        28,
-        7
+    time = st.segmented_control(
+        "Curing Age",
+        options=[7, 28],
+        default=28
     )
 
     features = create_features(
@@ -739,11 +738,10 @@ elif page == "AI Mix Design":
         40
     )
 
-    age = st.slider(
-        "Age (Days)",
-        1,
-        28,
-        7
+    age = st.segmented_control(
+        "Target Age",
+        options=[7, 28],
+        default=28
     )
 
     if st.button(
