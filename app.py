@@ -671,8 +671,8 @@ elif page == "Strength":
     time = st.slider(
         "Curing Time (Days)",
         1,
-        365,
-        28
+        28,
+        7
     )
 
     features = create_features(
