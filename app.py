@@ -684,15 +684,34 @@ elif page == "Strength":
         "Compressive Strength Prediction"
     )
 
-    age_label = st.radio(
-        "Target Age",
-        ["7 Days", "28 Days"],
-        horizontal=True,
-        index=1
-    )
-    
-    age = 7 if age_label == "7 Days" else 28
+    col1, col2 = st.columns(2)
 
+    with col1:
+        age7 = st.button(
+            "🗓️ 7 Days",
+            use_container_width=True
+        )
+    
+    with col2:
+        age28 = st.button(
+            "🗓️ 28 Days",
+            use_container_width=True
+        )
+    
+    if "age" not in st.session_state:
+        st.session_state.age = 28
+    
+    if age7:
+        st.session_state.age = 7
+    
+    if age28:
+        st.session_state.age = 28
+    
+    age = st.session_state.age
+    
+    st.info(
+        f"Selected Age: {age} Days"
+    )
     features = create_features(
         cement,
         fine,
