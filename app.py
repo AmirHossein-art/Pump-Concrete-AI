@@ -687,7 +687,8 @@ elif page == "Strength":
     age = st.radio(
         "Target Age",
         options=[7, 28],
-        default=28
+        index=1,
+        horizontal=True
     )
 
     features = create_features(
@@ -757,7 +758,8 @@ elif page == "AI Mix Design":
     age = st.radio(
         "Target Age",
         options=[7, 28],
-        default=28
+        index=1,
+        horizontal=True
     )
 
     if st.button(
