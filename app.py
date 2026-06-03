@@ -691,24 +691,24 @@ elif page == "Strength":
             "🗓️ 7 Days",
             use_container_width=True
         )
-    
+
     with col2:
         age28 = st.button(
             "🗓️ 28 Days",
             use_container_width=True
         )
-    
+
     if "age" not in st.session_state:
         st.session_state.age = 28
-    
+
     if age7:
         st.session_state.age = 7
-    
+
     if age28:
         st.session_state.age = 28
-    
+
     age = st.session_state.age
-    
+
     st.info(
         f"Selected Age: {age} Days"
     )
@@ -776,11 +776,33 @@ elif page == "AI Mix Design":
         40
     )
 
-    age = st.radio(
-        "Target Age",
-        options=[7, 28],
-        index=1,
-        horizontal=True
+    col1, col2 = st.columns(2)
+
+    with col1:
+        age7 = st.button(
+            "🗓️ 7 Days",
+            use_container_width=True
+        )
+    
+    with col2:
+        age28 = st.button(
+            "🗓️ 28 Days",
+            use_container_width=True
+        )
+    
+    if "age" not in st.session_state:
+        st.session_state.age = 28
+    
+    if age7:
+        st.session_state.age = 7
+    
+    if age28:
+        st.session_state.age = 28
+    
+    age = st.session_state.age
+    
+    st.info(
+        f"Selected Age: {age} Days"
     )
 
     if st.button(
