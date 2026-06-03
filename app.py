@@ -684,13 +684,19 @@ elif page == "Strength":
         "Compressive Strength Prediction"
     )
 
-    age = st.radio(
-        "Target Age",
-        options=[7, 28],
-        index=1,
-        horizontal=True
-    )
+    col1, col2 = st.columns(2)
 
+    with col1:
+        day7 = st.button(
+            "7 Days",
+            use_container_width=True
+        )
+    
+    with col2:
+        day28 = st.button(
+            "28 Days",
+            use_container_width=True
+        )
     features = create_features(
         cement,
         fine,
